@@ -13,7 +13,7 @@ public class MinimalCalendar extends JPanel {
     private LocalDate selectedDate;
     private JLabel monthYearLabel;
     private JPanel daysPanel;
-    private Consumer<LocalDate> onDateSelected; //реакция (реальные действия с данными/запросами к контроллеру/модели) на выбор каждой новой даты
+    private Consumer<LocalDate> onDateSelected; 
     private TasksListController controller;
     
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("MMMM yyyy");
@@ -25,8 +25,8 @@ public class MinimalCalendar extends JPanel {
         initUI();
     }
     
-    public void setOnDateSelected(Consumer<LocalDate> callback) { //????????????????
-        this.onDateSelected = callback; // вызов действия-реакции на событие (надо понять, где его прописать + придумать логику)
+    public void setOnDateSelected(Consumer<LocalDate> callback) { 
+        this.onDateSelected = callback; 
     }
 
 
@@ -39,15 +39,15 @@ public class MinimalCalendar extends JPanel {
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // Верхняя панель с навигацией
+        
         JPanel navigationPanel = createNavigationPanel();
         add(navigationPanel, BorderLayout.NORTH);
         
-        // Панель с днями недели
+        
         JPanel weekDaysPanel = createWeekDaysPanel();
         add(weekDaysPanel, BorderLayout.CENTER);
         
-        // Панель с числами месяца
+        
         daysPanel = new JPanel(new GridLayout(0, 7, 5, 5));
         add(daysPanel, BorderLayout.SOUTH);
         
@@ -102,9 +102,9 @@ public class MinimalCalendar extends JPanel {
         YearMonth yearMonth = YearMonth.from(currentDate);
         LocalDate firstOfMonth = yearMonth.atDay(1);
         
-        // Получаем день недели первого числа месяца (понедельник = 1, воскресенье = 7)
+        
         int firstDayOfWeek = firstOfMonth.getDayOfWeek().getValue();
-        // Корректируем, чтобы понедельник был первым
+        
         int offset = firstDayOfWeek - 1;
         
         int daysInMonth = yearMonth.lengthOfMonth();
@@ -113,12 +113,12 @@ public class MinimalCalendar extends JPanel {
         
         daysPanel.removeAll();
         
-        // Пустые ячейки для дней предыдущего месяца
+        
         for (int i = 0; i < offset; i++) {
             daysPanel.add(createEmptyDayCell());
         }
         
-        // Ячейки для дней текущего месяца
+        
         for (int day = 1; day <= daysInMonth; day++) {
             LocalDate date = currentDate.withDayOfMonth(day);
             daysPanel.add(createDayCell(date));
@@ -137,7 +137,7 @@ public class MinimalCalendar extends JPanel {
         
         cell.add(dayLabel, BorderLayout.CENTER);
         
-        // Подсветка выбранной даты
+        
         if (date.equals(selectedDate)) {
             cell.setBackground(new Color(200, 220, 255));
             dayLabel.setFont(new Font("Arial", Font.BOLD, 12));
@@ -153,7 +153,7 @@ public class MinimalCalendar extends JPanel {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 selectedDate = date;
                 updateCalendar();
-                refresh_data(); // вызываем общий метод уведомления
+                refresh_data(); 
             }
         });
         

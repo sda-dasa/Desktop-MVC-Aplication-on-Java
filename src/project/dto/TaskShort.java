@@ -1,17 +1,17 @@
 package project.dto;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-//import lombok.Getter;
+
 
 public class TaskShort {
 
-    //@Getter
+   
     private String date_info;
     
-    //@Getter
+ 
     private int id;
 
-    //@Getter
+   
     private String title;
 
 
