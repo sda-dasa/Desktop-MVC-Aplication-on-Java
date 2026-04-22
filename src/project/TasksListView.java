@@ -6,7 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import project.TaskDialog;
 import java.awt.event.MouseAdapter; 
-import java.awt.event.MouseEvent; 
+import java.awt.event.MouseEvent;
+import project.gui.MinimalCalendar; 
 
 
 public class TasksListView extends JPanel {
@@ -14,6 +15,7 @@ public class TasksListView extends JPanel {
     private JButton edit_btn;
     private JButton add_btn;
     private JButton delete_btn;
+    private MinimalCalendar calendar;
     
     private JPanel tasksContainer;
     private TaskShort[] currentTasks;
@@ -96,7 +98,6 @@ public class TasksListView extends JPanel {
         taskPanel.add(leftPanel, BorderLayout.CENTER);
         taskPanel.add(dateLabel, BorderLayout.EAST);
 
-        // add_listener_to_task_panel(taskPanel, task);
 
         taskPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -123,28 +124,9 @@ public class TasksListView extends JPanel {
     }
 
 
-    // private void add_listener_to_task_panel(JPanel taskPanel, TaskShort task){
-    //     taskPanel.addMouseListener(new MouseAdapter() {
-    //         @Override
-    //         public void mouseClicked(MouseEvent e) {
-    //             selectTask(task, taskPanel);
-    //         }
-            
-    //         @Override
-    //         public void mouseEntered(MouseEvent e) {
-    //             if (selectedTask != task) {
-    //                 taskPanel.setBackground(new Color(240, 240, 255));
-    //             }
-    //         }
-            
-    //         @Override
-    //         public void mouseExited(MouseEvent e) {
-    //             if (selectedTask != task) {
-    //                 taskPanel.setBackground(Color.WHITE);
-    //             }
-    //         }
-    //     });
-    // }
+    public void setCalendar(MinimalCalendar calendar){
+        this.calendar = calendar;
+    }
 
 
     private void selectTask(TaskShort task, JPanel panel) {
@@ -199,7 +181,8 @@ public class TasksListView extends JPanel {
         if (dialog.isConfirmed()) {
             String title = dialog.getTitle();
             String content = dialog.getContent();
-            controller.addTask(title, content);
+            LocalDate appointment_date = this.calendar.getSelectedDate();
+            controller.addTask(title, content, appointment_date);
         }
     }
     
@@ -223,7 +206,7 @@ public class TasksListView extends JPanel {
             if (dialog.isConfirmed()) {
                 String newTitle = dialog.getTitle();
                 String newContent = dialog.getContent();
-                controller.updateTask(selectedTask.getId(), newTitle, newContent);
+                controller.updateTask(selectedTask.getId(), newTitle, newContent, this.calendar.getSelectedDate());
             }
         });
     }

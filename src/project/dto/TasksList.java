@@ -31,9 +31,7 @@ public class TasksList {
     }
     
     public TaskShort[] get_short_info(LocalDateTime date) {
-
-        // Конвертируем LocalDateTime в LocalDate для поиска в БД
-
+        
         LocalDate localDate = date.toLocalDate();
         List<Task> tasksForDate = db.getTasksByDate(localDate);
         
@@ -54,14 +52,14 @@ public class TasksList {
         notify_observers(LocalDateTime.now());
     }
 
-    public void updateTask(int id, String title, String content) {
+    public void updateTask(int id, String title, String content, LocalDate appointment_date) {
         Task task = db.getTaskById(id);
         if (task != null) {
             task.setTitle(title);
             task.setContent(content);
-            task.setLast_changes_date(LocalDateTime.now());
+            task.setAppointment_date(appointment_date);
             db.updateTask(task);
-            notify_observers(LocalDateTime.now());
+            notify_observers(appointment_date.atStartOfDay());
         }
     }
 

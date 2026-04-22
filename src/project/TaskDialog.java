@@ -85,7 +85,7 @@ public class TaskDialog extends JDialog {
             return false;
         }
         
-        if (content.isEmpty()) {
+        if (title.isEmpty() && content.isEmpty()) {
             JOptionPane.showMessageDialog(this, 
                 "Содержимое не может быть пустым", 
                 "Ошибка ввода", 

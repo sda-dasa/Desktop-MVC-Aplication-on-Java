@@ -30,8 +30,8 @@ public class TasksListController {
     }
 
 
-    public void addTask(String title, String content) {
-        Task newTask = new Task();
+    public void addTask(String title, String content, LocalDate appointment_date) {
+        Task newTask = new Task(appointment_date);
         newTask.setTitle(title);
         newTask.setContent(content);
         model.addTask(newTask);
@@ -39,8 +39,8 @@ public class TasksListController {
         refresh_data(LocalDate.now());
     }
     
-    public void updateTask(int id, String title, String content) {
-        model.updateTask(id, title, content);
+    public void updateTask(int id, String title, String content, LocalDate appointment_date) {
+        model.updateTask(id, title, content, appointment_date);
         
         refresh_data(LocalDate.now());
     }

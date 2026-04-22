@@ -15,13 +15,11 @@ public class H2Database implements DBInterface {
     
     public H2Database() {
         try {
-            // Загружаем драйвер H2
+            
             Class.forName("org.h2.Driver");
             
-            // Подключаемся к БД (создаст файл автоматически)
             connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             
-            // Создаём таблицу, если её нет
             createTableIfNotExists();
             
         } catch (ClassNotFoundException e) {
@@ -39,21 +37,22 @@ public class H2Database implements DBInterface {
                 title VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
                 creation_date TIMESTAMP NOT NULL,
-                last_changes_date TIMESTAMP NOT NULL
+                appointment_date TIMESTAMP NOT NULL
             )
             """;
         
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute(sql);
-            
-            // Добавим несколько тестовых задач, если таблица пустая
+            stmt.execute(sql);            
+
             insertTestDataIfEmpty();
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
+
+
+
     private void insertTestDataIfEmpty() {
         try {
             Statement stmt = connection.createStatement();
@@ -61,10 +60,9 @@ public class H2Database implements DBInterface {
             rs.next();
             int count = rs.getInt(1);
             
-            if (count == 0) {
-                // Тестовые данные
+            if (count == 0) {                
                 String insertSql = """
-                    INSERT INTO tasks (title, content, creation_date, last_changes_date) VALUES
+                    INSERT INTO tasks (title, content, creation_date, appointment_date) VALUES
                     ('Купить продукты', 'Молоко, хлеб, яйца, масло', NOW(), NOW()),
                     ('Сделать домашнее задание', 'Закончить проект по Java', NOW(), NOW()),
                     ('Позвонить маме', 'Не забыть поздравить с днём рождения', NOW(), NOW()),
@@ -72,7 +70,7 @@ public class H2Database implements DBInterface {
                     ('Прочитать книгу', '"Чистый код" Роберт Мартин', NOW(), NOW())
                     """;
                 stmt.execute(insertSql);
-                System.out.println("Test data inserted successfully!");
+                
             }
             rs.close();
         } catch (SQLException e) {
@@ -84,19 +82,20 @@ public class H2Database implements DBInterface {
     public List<Task> getTasksByDate(LocalDate date) {
         List<Task> tasks = new ArrayList<>();
         // Исправленный SQL - сравниваем дату без времени
-        String sql = "SELECT * FROM tasks WHERE CAST(creation_date AS DATE) = ? ORDER BY id";
+        String sql = "SELECT * FROM tasks WHERE CAST(appointment_date AS DATE) = ? ORDER BY id";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setDate(1, Date.valueOf(date));
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                Task task = new Task();
+                LocalDateTime dateTime = rs.getTimestamp("appointment_date").toLocalDateTime();
+                Task task = new Task(dateTime.toLocalDate());
                 task.setId(rs.getInt("id"));
                 task.setTitle(rs.getString("title"));
                 task.setContent(rs.getString("content"));
                 task.setCreation_date(rs.getTimestamp("creation_date").toLocalDateTime());
-                task.setLast_changes_date(rs.getTimestamp("last_changes_date").toLocalDateTime());
+                
                 tasks.add(task);
             }
             
@@ -116,13 +115,15 @@ public class H2Database implements DBInterface {
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
-                Task task = new Task();
+                LocalDateTime dateTime = rs.getTimestamp("appointment_date").toLocalDateTime();
+                Task task = new Task(dateTime.toLocalDate());
+                
                 task.setId(rs.getInt("id"));
                 
                 task.setTitle(rs.getString("title"));
                 task.setContent(rs.getString("content"));
                 task.setCreation_date(rs.getTimestamp("creation_date").toLocalDateTime());
-                task.setLast_changes_date(rs.getTimestamp("last_changes_date").toLocalDateTime());
+                
                 return task;
             }
             
@@ -135,13 +136,13 @@ public class H2Database implements DBInterface {
     
     @Override
     public void addTask(Task task) {
-        String sql = "INSERT INTO tasks (title, content, creation_date, last_changes_date) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO tasks (title, content, creation_date, appointment_date) VALUES (?, ?, ?, ?)";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, task.getTitle());
             pstmt.setString(2, task.getContent());
             pstmt.setTimestamp(3, Timestamp.valueOf(task.getCreation_date()));
-            pstmt.setTimestamp(4, Timestamp.valueOf(task.getLast_changes_date()));
+            pstmt.setTimestamp(4, Timestamp.valueOf(task.getAppointment_date().atStartOfDay()));
             pstmt.executeUpdate();
             
             ResultSet generatedKeys = pstmt.getGeneratedKeys();
@@ -156,12 +157,13 @@ public class H2Database implements DBInterface {
     
     @Override
     public void updateTask(Task task) {
-        String sql = "UPDATE tasks SET title = ?, content = ?, last_changes_date = ? WHERE id = ?";
+
+        String sql = "UPDATE tasks SET title = ?, content = ?, appointment_date = ? WHERE id = ?";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, task.getTitle());
             pstmt.setString(2, task.getContent());
-            pstmt.setTimestamp(3, Timestamp.valueOf(task.getLast_changes_date()));
+            pstmt.setTimestamp(3, Timestamp.valueOf(task.getAppointment_date().atStartOfDay()));
             pstmt.setInt(4, task.getId());
             pstmt.executeUpdate();
             
@@ -192,12 +194,13 @@ public class H2Database implements DBInterface {
             ResultSet rs = stmt.executeQuery(sql);
             
             while (rs.next()) {
-                Task task = new Task();
+                LocalDateTime dateTime = rs.getTimestamp("appointment_date").toLocalDateTime();
+                Task task = new Task(dateTime.toLocalDate());
+
                 task.setId(rs.getInt("id"));
                 task.setTitle(rs.getString("title"));
                 task.setContent(rs.getString("content"));
                 task.setCreation_date(rs.getTimestamp("creation_date").toLocalDateTime());
-                task.setLast_changes_date(rs.getTimestamp("last_changes_date").toLocalDateTime());
                 tasks.add(task);
             }
             

@@ -31,6 +31,7 @@ public class Box1 extends JFrame {
 
         calendar = new MinimalCalendar();
         tasksListView = new TasksListView();
+        tasksListView.setCalendar(calendar);
         
         
         controller = new TasksListController(tasksListView); 
